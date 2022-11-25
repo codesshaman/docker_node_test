@@ -1,0 +1,33 @@
+version: '3.6'
+services:
+  react:
+    environment:
+      - GIT_ACC
+      - GIT_TOKEN
+      - GIT_URL
+    build:
+      context: .
+      dockerfile: build.Dockerfile
+      args: 
+        GIT_ACC: ${GIT_ACC}
+        GIT_TOKEN: ${GIT_TOKEN}
+        GIT_URL: ${GIT_URL}
+        REACT_APP_BUILD_SSL: ${BUILD_SSL}
+        REACT_APP_BUILD_URL: ${BUILD_URL}
+        REACT_APP_BUILD_PORT: ${BUILD_PORT}
+    volumes:
+      - ./output:/data/build
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "1080:80"
+      - "1443:443"
+    volumes:
+      - ./output:/data/app
+    restart: unless-stopped
+    depends_on: 
+      react:
+        condition: service_completed_successfully
